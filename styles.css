@@ -23,58 +23,6 @@ body {
     color: rgb(0, 0, 0);
 }
 
-main {
-    padding: 4%;
-}
-
-section {
-    margin-bottom: 20px;
-}
-
-.about img {
-    height: 300px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-}
-
-footer {
-    background-color: black;
-    color: white;
-    text-align: center;
-}
-
-header {
-    margin: 0;
-    padding: 4% 0 0 4% ;
-}
-
-nav {
-    display: flex;
-    gap: 20px;
-}
-
-.popular table {
-    width: 50%;
-    margin-top: 20px;
-    border-collapse: collapse;
-}
-
-.popular table th,td {
-    border: 1px solid #000000;
-    padding: 4px;
-}
-
-
-footer {
-    align-content: center;
-    padding: 2%;
-}
-
-
-footer a {
-    color: rgb(255, 255, 255);
-}
-
 h1 {
     margin-bottom: 0.6em;
 }
@@ -84,12 +32,10 @@ h2 {
 }
 
 a {
-    text-decoration: none;
     font-family: 'Raleway', sans-serif;
     font-size: 20px;
-    color: black;
 }
 
-a:hover {
-    color: rgb(242, 72, 72);
+.labs {
+    padding: 30px;
 }
