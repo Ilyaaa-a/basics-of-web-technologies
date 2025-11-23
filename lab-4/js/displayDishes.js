@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.setAttribute('data-dish', dish.keyword); // Добавляем data-атрибут
 
         card.innerHTML = `
-            <img src="/lab-4/images/${dish.image}.jpg" alt="${dish.name}">
+            <img src="/basics-of-web-technologies/lab-4/images/${dish.image}.jpg" alt="${dish.name}">
             <p class="price">${dish.price}₽</p>
             <p class="name">${dish.name}</p>
             <p class="weight">${dish.count}</p>
