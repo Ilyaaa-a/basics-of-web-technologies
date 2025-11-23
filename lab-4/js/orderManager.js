@@ -33,6 +33,8 @@ function updateOrderDisplay() {
         return;
     }
 
+    // Восстанавливаем заголовок
+    let html = `<h3>Ваш заказ</h3>`;
 
     // Отображаем каждую категорию
     for (const [category, dish] of Object.entries(currentOrder)) {
@@ -100,5 +102,5 @@ function calculateTotalCost() {
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    updateOrderDisplay();
+    updateOrderDisplay(); // Изначально показываем "Ничего не выбрано"
 });

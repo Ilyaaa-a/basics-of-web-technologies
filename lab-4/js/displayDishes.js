@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.setAttribute('data-dish', dish.keyword); // Добавляем data-атрибут
 
         card.innerHTML = `
-            <img src="/basics-of-web-technologies/lab-4/images/${dish.image}.jpg" alt="${dish.name}">
+            <img src="/lab-4/images/${dish.image}.jpg" alt="${dish.name}">
             <p class="price">${dish.price}₽</p>
             <p class="name">${dish.name}</p>
             <p class="weight">${dish.count}</p>
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return card;
     }
 
-    // Очищаем содержимое секций
+    // Очищаем содержимое секций (на случай, если там что-то есть)
     soupSection.innerHTML = '';
     mainCourseSection.innerHTML = '';
     beverageSection.innerHTML = '';
