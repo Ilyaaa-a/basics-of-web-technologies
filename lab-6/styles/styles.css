@@ -1,0 +1,157 @@
+.raleway {
+    font-family: "Raleway", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    font-family: 'Raleway', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    font-style: normal;
+    color: rgb(0, 0, 0);
+}
+
+main {
+    flex: 1;
+    padding: 4%;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+nav a.active {
+    color: tomato;
+}
+
+nav a {
+    text-decoration: none;
+    font-family: 'Raleway', sans-serif;
+    font-size: 20px;
+    color: black;
+    transition: all 0.1s ease;
+}
+
+nav a:hover {
+    color: tomato;
+}
+
+
+.about img {
+    height: 300px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+
+footer {
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+
+header {
+    margin: 0;
+    padding: 4% 0 0 4% ;
+}
+
+nav {
+    display: flex;
+    gap: 20px;
+}
+
+.popular table {
+    width: 50%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.popular table th,td {
+    border: 1px solid #000000;
+    padding: 4px;
+}
+
+
+footer {
+    align-content: center;
+    padding: 2%;
+}
+
+
+footer a {
+    color: rgb(255, 255, 255);
+}
+
+h1 {
+    margin-bottom: 0.6em;
+}
+
+h2 {
+    margin-bottom: 0.4em;
+}
+
+
+/* ≤800px */
+@media (max-width: 800px) {
+    nav {
+        justify-content: space-between;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .about img {
+        width: 500px;
+        height: auto;
+    }
+}
+
+/* ≤600px */
+@media (max-width: 600px) {
+    nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    nav a {
+        font-size: 24px;
+    }
+
+    .about img {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* ≤400px */
+@media (max-width: 400px) {
+    .popular table th,
+    .popular table td {
+        font-size: 14px;
+    }
+
+    .popular table {
+        width: 100%;
+    }
+}
