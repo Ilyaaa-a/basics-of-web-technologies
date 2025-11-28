@@ -161,3 +161,54 @@ function getSortedArray(array, key) {
     alert(JSON.stringify(sorted, null, 2))
     return sorted;
 }
+
+
+// lab 7 Шифр Цезаря
+
+//  Функция для шифрования и дешифрования строки с использованием шифра Цезаря
+//  @param {string} str — входная строка
+//  @param {number} shift — величина сдвига (может быть отрицательной)
+//  @param {string} action — 'encode' для шифрования, 'decode' для расшифровки
+//  @returns {string} — зашифрованная или расшифрованная строка
+
+function cesar(str, shift, action) {
+    const alphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+    const upperAlphabet = alphabet.toUpperCase();
+    let result = '';
+
+    // Нормализуем сдвиг, чтобы он был в пределах длины алфавита
+    const normalizedShift = ((shift % alphabet.length) + alphabet.length) % alphabet.length;
+
+    for (let char of str) {
+        let newChar = char;
+
+        // Определяем, в каком регистре символ и принадлежит ли он алфавиту
+        if (alphabet.includes(char)) {
+            const index = alphabet.indexOf(char);
+            let newIndex;
+            if (action === 'encode') {
+                newIndex = (index + normalizedShift) % alphabet.length;
+            } else if (action === 'decode') {
+                newIndex = (index - normalizedShift + alphabet.length) % alphabet.length;
+            }
+            newChar = alphabet[newIndex];
+        } else if (upperAlphabet.includes(char)) {
+            const index = upperAlphabet.indexOf(char);
+            let newIndex;
+            if (action === 'encode') {
+                newIndex = (index + normalizedShift) % alphabet.length;
+            } else if (action === 'decode') {
+                newIndex = (index - normalizedShift + alphabet.length) % alphabet.length;
+            }
+            newChar = upperAlphabet[newIndex];
+        }
+
+        result += newChar;
+    }
+
+    alert(result)
+    return result;
+}
+
+// shift = 8
+// хакуна матата

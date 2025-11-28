@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Math Game</title>
+    <link rel="stylesheet" href="/js-labs/math_game/styles.css">
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <h1>Math Game</h1>
+        <div class="info" id="levelInfo">Уровень: Начальный</div>
+        <div class="question" id="question">Загрузка...</div>
+        <input type="text" id="answerInput" placeholder="Ваш ответ" autocomplete="off">
+        <button id="submitBtn">Отправить</button>
+        <div class="result" id="result"></div>
+        <div class="stats" id="stats">Правильных: 0 | Неправильных: 0</div>
+        <div class="congrats hidden" id="congratsMsg"></div>
+        <div id="endButtons" class="hidden">
+            <button class="restart-btn" id="restartBtn">Начать заново</button>
+            <button class="exit-btn" id="exitBtn">Выйти</button>
+        </div>
+    </div>
+
+    <script src="/js-labs/math_game/script.js"></script>
+</body>
+</html>
