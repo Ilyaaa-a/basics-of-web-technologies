@@ -131,17 +131,17 @@ function getSortedArray(array, key) {
 
             // Сравниваем значения в зависимости от их типа
             if (typeof a === 'string' && typeof b === 'string') {
-                // Лексикографическое сравнение строк
+
                 if (a > b) {
                     shouldSwap = true;
                 }
             } else if (typeof a === 'number' && typeof b === 'number') {
-                // Числовое сравнение
+
                 if (a > b) {
                     shouldSwap = true;
                 }
             } else {
-                // Если типы разные, приводим к строкам и сравниваем
+    
                 let strA = String(a);
                 let strB = String(b);
                 if (strA > strB) {
