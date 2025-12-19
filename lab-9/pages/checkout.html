@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформить заказ | Food Construct</title>
+    <link rel="stylesheet" href="/lab-9/styles/styles.css">
+    <link rel="stylesheet" href="/lab-9/styles/lunch.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+
+    <script src="/lab-9/js/orderManager.js"></script>
+    <script src="/lab-9/js/checkout.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Food Construct</h1>
+        <nav>
+            <a href="/lab-9/index.html">О нас</a>
+            <a href="/lab-9/pages/lunch.html">Собрать ланч</a>
+            <a href="/lab-9/pages/checkout.html" class="active">Оформить заказ</a>
+            <a href="#footer">Контакты</a>
+        </nav>
+    </header>
+    <main>
+
+        <div class="order-section" id="order-section">
+                    <!-- Здесь будет подгружаться список блюд -->
+                </div>
+        <section class="order-form">
+            <h1>ЭТО УЧЕБНОЕ ЗАДАНИЕ! НЕ ОТПРАВЛЯЙТЕ СВОИ ЛИЧНЫЕ ДАННЫЕ!!!</h1>
+            <h2>Оформление заказа</h2>
+            <div class="form-grid">
+                <!-- Состав заказа -->
+                
+                <!-- Форма данных клиента -->
+                <div class="customer-section">
+                    <h3>Ваши данные</h3>
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label for="full_name">Имя</label>
+                            <input type="text" id="full_name" name="full_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="subscribe" name="subscribe" value="1">
+                            <label for="subscribe">Получать информацию о скидках и акциях</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Номер телефона</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery_address">Адрес доставки</label>
+                            <input type="text" id="delivery_address" name="delivery_address" required>
+                            <p class="note">Доставка осуществляется только по Москве</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Время доставки:</label>
+                            <div class="radio-group">
+                                <div>
+                                    <input type="radio" id="delivery_now" name="delivery_type" value="now" required>
+                                    <label for="delivery_now">Как можно скорее</label>
+                                </div>
+                                <div>
+                                    <input type="radio" id="delivery_by_time" name="delivery_type" value="by_time">
+                                    <label for="delivery_by_time">К указанному времени</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery_time">Укажите время доставки</label>
+                            <input type="time" id="delivery_time" name="delivery_time" min="07:00" max="23:00"
+                                step="300">
+                            <p class="note">Доступное время доставки с 7:00 до 23:00</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Комментарии к заказу</label>
+                            <textarea id="comment" name="comment" rows="3"></textarea>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit">Отправить заказ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer id="footer">
+        Позвонить нам <a href="tel:+70000000000">+7-000-000-00-00</a>
+    </footer>
+
+    <script src="/lab-9/js/dishes.js"></script>
+    <script src="/lab-9/js/displayDishes.js"></script>
+    <script src="/lab-9/js/orderManager.js"></script>
+    <script src="/lab-9/js/checkout.js"></script>
+</body>
+
+</html>
