@@ -1,0 +1,51 @@
+<!-- pages/orders.html -->
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заказы | Food Construct</title>
+    <link rel="stylesheet" href="/lab-9/styles/styles.css">
+    <link rel="stylesheet" href="/lab-9/styles/lunch.css">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <h1>Food Construct</h1>
+        <nav>
+            <a href="/lab-9/index.html">О нас</a>
+            <a href="/lab-9/pages/lunch.html">Собрать ланч</a>
+            <a href="/lab-9/pages/checkout.html">Оформить заказ</a>
+            <a href="/lab-9/pages/orders.html" class="active">Заказы</a>
+            <a href="#footer">Контакты</a>
+        </nav>
+    </header>
+    <main>
+        <section class="orders-section">
+            <h1>История заказов</h1>
+            <div id="orders-container">
+                <!-- Здесь будет список заказов -->
+                <p>Загрузка...</p>
+            </div>
+        </section>
+    </main>
+    <footer id="footer">
+        Позвонить нам <a href="tel:+70000000000">+7-000-000-00-00</a>
+    </footer>
+
+    <!-- Модальные окна -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div id="modal-body"></div>
+            <div id="modal-actions"></div>
+        </div>
+    </div>
+
+    <script src="/lab-9/js/orderManager.js"></script>
+    <script src="/lab-9/js/orders.js"></script>
+</body>
+
+</html>

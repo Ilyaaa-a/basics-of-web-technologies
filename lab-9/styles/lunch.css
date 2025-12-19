@@ -520,6 +520,142 @@
     color: #333;
 }
 
+/* === Стили для страницы заказов === */
+.orders-section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.orders-section h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.order-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.order-info {
+    flex: 1;
+}
+
+.order-info p {
+    margin: 4px 0;
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.order-actions button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.order-actions .view {
+    background: #e0e0e0;
+}
+
+.order-actions .edit {
+    background: #d0e7ff;
+}
+
+.order-actions .delete {
+    background: #ffcdd2;
+    color: #c62828;
+}
+
+/* === Модальные окна === */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.modal-body h2 {
+    margin-bottom: 15px;
+}
+
+.modal-form .form-group {
+    margin-bottom: 15px;
+}
+
+.modal-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-form input,
+.modal-form textarea,
+.modal-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+.modal-actions button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-actions .cancel {
+    background: #f0f0f0;
+}
+
+.modal-actions .save,
+.modal-actions .confirm {
+    background: tomato;
+    color: white;
+}
+
 /* --- Адаптивность --- */
 @media (max-width: 800px) {
     .form-columns {
