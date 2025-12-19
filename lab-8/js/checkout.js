@@ -22,15 +22,18 @@ function renderOrderSection() {
 
     if (!hasAny) {
         container.innerHTML = `
+        <div>
             <h3>Состав заказа</h3>
             <p>Ничего не выбрано. Чтобы добавить блюда в заказ, перейдите на страницу 
                 <a href="/lab-8/pages/lunch.html">Собрать ланч</a>.
             </p>
+        </div>
         `;
         return;
     }
 
-    let html = '<h3>Состав заказа</h3>';
+    // let html = '<h3>Состав заказа</h3>';
+    let html = '';
     for (const [category, dish] of Object.entries(currentOrder)) {
         if (dish) {
             const dishData = dishes.find(d => d.keyword === dish.keyword);
