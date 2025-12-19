@@ -1,7 +1,7 @@
 import os
 
 # Настройки
-PROJECT_DIR = "."  # Путь к корню вашего проекта (по умолчанию — текущая папка)
+PROJECT_DIR = "lab-8/"  # Путь к корню вашего проекта (по умолчанию — текущая папка)
 OUTPUT_FILE = "project_code.txt"
 CODE_EXTENSIONS = {
     '.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.htm', '.css', '.scss', '.sass',
