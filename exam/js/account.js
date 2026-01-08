@@ -1,485 +1,626 @@
-// JavaScript приложение для личного кабинета
+let allOrders = []
+let allCourses = []
+let allTutors = []
+let currentOrderPage = 1
+let currentEditOrder = null
+const ITEMS_PER_PAGE = 5
 
-// Конфигурация API
-const API_BASE_URL = 'http://exam-api-courses.std-900.ist.mospolytech.ru';
-const API_KEY = '605c13e7-9e68-4177-82c9-769249fbe7b8';
+document.addEventListener('DOMContentLoaded', function () {
+  loadData()
+  setupEventListeners()
+})
 
-// Глобальные переменные
-let orders = [];
-let currentPage = 1;
-let itemsPerPage = 5;
-let currentOrderId = null;
+function setupEventListeners() {
+  const saveEditBtn = document.getElementById('save-edit-btn')
+  if (saveEditBtn) {
+    saveEditBtn.addEventListener('click', saveEdit)
+  }
 
-// DOM элементы
-const notificationArea = document.getElementById('notificationArea');
-const ordersContent = document.getElementById('ordersContent');
-const ordersPagination = document.getElementById('ordersPagination');
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn')
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', confirmDelete)
+  }
 
-// Инициализация приложения
-document.addEventListener('DOMContentLoaded', function() {
-    loadOrders();
-});
+  const editStartDate = document.getElementById('edit-start-date')
+  if (editStartDate) {
+    editStartDate.addEventListener('change', handleEditDateChange)
+  }
 
-// API функции
-async function fetchData(endpoint) {
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}?api_key=${API_KEY}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        showNotification('Ошибка загрузки данных', 'danger');
-        return [];
-    }
+  const editStartTime = document.getElementById('edit-start-time')
+  if (editStartTime) {
+    editStartTime.addEventListener('change', calculateEditTotalCost)
+  }
+
+  const editStudents = document.getElementById('edit-students')
+  if (editStudents) {
+    editStudents.addEventListener('input', calculateEditTotalCost)
+  }
+
+  const editCheckboxes = document.querySelectorAll('#edit-order-form input[type="checkbox"]')
+  if (editCheckboxes.length > 0) {
+    editCheckboxes.forEach(function (checkbox) {
+      checkbox.addEventListener('change', calculateEditTotalCost)
+    })
+  }
 }
 
-async function putData(endpoint, data) {
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}?api_key=${API_KEY}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Error updating data:', error);
-        showNotification('Ошибка обновления данных', 'danger');
-        return null;
-    }
+async function loadData() {
+  const ordersBody = document.getElementById('orders-table-body')
+  if (!ordersBody) return
+
+  ordersBody.innerHTML = '<tr><td colspan="5" class="text-center"><div class="spinner-border text-primary"></div></td></tr>'
+
+  try {
+    const [orders, courses, tutors] = await Promise.all([
+      getOrders(),
+      getCourses(),
+      getTutors(),
+    ])
+
+    allOrders = orders
+    allCourses = courses
+    allTutors = tutors
+
+    renderOrders()
+  } catch (error) {
+    ordersBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Ошибка загрузки данных</td></tr>'
+    showNotification('Ошибка загрузки: ' + error.message, 'danger')
+  }
 }
 
-async function deleteData(endpoint) {
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}?api_key=${API_KEY}`, {
-            method: 'DELETE'
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Error deleting data:', error);
-        showNotification('Ошибка удаления данных', 'danger');
-        return null;
-    }
-}
-
-// Функции загрузки данных
-async function loadOrders() {
-    orders = await fetchData('/api/orders');
-    renderOrders();
-}
-
-// Функции отображения
 function renderOrders() {
-    if (orders.length === 0) {
-        ordersContent.innerHTML = `
-            <div class="text-center py-5">
-                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                <h5>У вас пока нет заказов</h5>
-                <p class="text-muted">Начните обучение с выбора курса или репетитора</p>
-                <a href="index.html" class="btn btn-primary">Выбрать курс</a>
-            </div>
-        `;
-        ordersPagination.innerHTML = '';
-        return;
-    }
-    
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedOrders = orders.slice(startIndex, endIndex);
-    
-    ordersContent.innerHTML = `
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Название</th>
-                        <th>Дата начала</th>
-                        <th>Время начала</th>
-                        <th>Продолжительность</th>
-                        <th>Студентов</th>
-                        <th>Стоимость</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${paginatedOrders.map((order, index) => `
-                        <tr>
-                            <td>${startIndex + index + 1}</td>
-                            <td>
-                                ${order.course_id ? getCourseName(order.course_id) : getTutorName(order.tutor_id)}
-                            </td>
-                            <td>${formatDate(order.date_start)}</td>
-                            <td>${order.time_start}</td>
-                            <td>${order.duration} час${getHourSuffix(order.duration)}</td>
-                            <td>${order.persons} студент${getStudentSuffix(order.persons)}</td>
-                            <td>${order.price.toLocaleString()} руб.</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="showOrderDetails(${order.id})" title="Подробнее">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="editOrder(${order.id})" title="Изменить">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDelete(${order.id})" title="Удалить">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+  const ordersBody = document.getElementById('orders-table-body')
+  if (!ordersBody) return
+
+  const totalPages = Math.ceil(allOrders.length / ITEMS_PER_PAGE)
+  const startIndex = (currentOrderPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const ordersToShow = allOrders.slice(startIndex, endIndex)
+
+  if (ordersToShow.length === 0) {
+    ordersBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">У вас пока нет заявок</td></tr>'
+    const pagination = document.getElementById('orders-pagination')
+    if (pagination) pagination.innerHTML = ''
+    return
+  }
+
+  ordersBody.innerHTML = ordersToShow
+    .map(function (order, index) {
+      const courseName = getCourseName(order)
+      const orderNumber = startIndex + index + 1
+
+      return `
+            <tr>
+                <td>${orderNumber}</td>
+                <td>${courseName}</td>
+                <td>${formatDate(order.date_start)} ${order.time_start}</td>
+                <td>${order.price} руб.</td>
+                <td>
+                    <button class="btn btn-info btn-sm me-1" onclick="showDetails(${order.id})">Подробнее</button>
+                    <button class="btn btn-warning btn-sm me-1" onclick="showEditModal(${order.id})">Изменить</button>
+                    <button class="btn btn-danger btn-sm" onclick="showDeleteModal(${order.id})">Удалить</button>
+                </td>
+            </tr>
+        `
+    })
+    .join('')
+
+  renderOrdersPagination(totalPages)
+}
+
+function renderOrdersPagination(totalPages) {
+  const pagination = document.getElementById('orders-pagination')
+  if (!pagination) return
+
+  if (totalPages <= 1) {
+    pagination.innerHTML = ''
+    return
+  }
+
+  let html = ''
+
+  html += `<li class="page-item ${currentOrderPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" data-page="${currentOrderPage - 1}">Назад</a>
+    </li>`
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<li class="page-item ${currentOrderPage === i ? 'active' : ''}">
+            <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>`
+  }
+
+  html += `<li class="page-item ${currentOrderPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="#" data-page="${currentOrderPage + 1}">Вперёд</a>
+    </li>`
+
+  pagination.innerHTML = html
+
+  pagination.querySelectorAll('.page-link').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault()
+      const page = parseInt(this.dataset.page)
+      if (page >= 1 && page <= totalPages) {
+        currentOrderPage = page
+        renderOrders()
+      }
+    })
+  })
+}
+
+function getCourseName(order) {
+  if (order.course_id && order.course_id !== 0) {
+    const course = allCourses.find(function (c) {
+      return c.id === order.course_id
+    })
+    return course ? course.name : 'Курс #' + order.course_id
+  }
+  if (order.tutor_id && order.tutor_id !== 0) {
+    const tutor = allTutors.find(function (t) {
+      return t.id === order.tutor_id
+    })
+    return tutor ? 'Репетитор: ' + tutor.name : 'Репетитор #' + order.tutor_id
+  }
+  return 'Не указано'
+}
+
+function getCourseOrTutor(order) {
+  if (order.course_id && order.course_id !== 0) {
+    return allCourses.find(function (c) {
+      return c.id === order.course_id
+    })
+  }
+  if (order.tutor_id && order.tutor_id !== 0) {
+    return allTutors.find(function (t) {
+      return t.id === order.tutor_id
+    })
+  }
+  return null
+}
+
+function showDetails(orderId) {
+  const order = allOrders.find(function (o) {
+    return o.id === orderId
+  })
+  if (!order) return
+
+  const courseName = getCourseName(order)
+  const options = []
+
+  if (order.early_registration) options.push('Ранняя регистрация (-10%)')
+  if (order.group_enrollment) options.push('Групповая скидка (-15%)')
+  if (order.intensive_course) options.push('Интенсивный курс (+20%)')
+  if (order.supplementary) options.push('Дополнительные материалы')
+  if (order.personalized) options.push('Индивидуальные занятия')
+  if (order.excursions) options.push('Культурные экскурсии (+25%)')
+  if (order.assessment) options.push('Оценка уровня языка')
+  if (order.interactive) options.push('Интерактивная платформа (+50%)')
+
+  const modalBody = document.getElementById('details-modal-body')
+  if (!modalBody) return
+
+  modalBody.innerHTML = `
+        <div class="mb-3">
+            <strong>Номер заявки:</strong> ${order.id}
         </div>
-    `;
-    
-    renderPagination();
-}
-
-function renderPagination() {
-    const totalPages = Math.ceil(orders.length / itemsPerPage);
-    ordersPagination.innerHTML = '';
-    
-    // Кнопка "Назад"
-    const prevLi = document.createElement('li');
-    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-    prevLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">Назад</a>`;
-    ordersPagination.appendChild(prevLi);
-    
-    // Номера страниц
-    for (let i = 1; i <= totalPages; i++) {
-        const li = document.createElement('li');
-        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-        li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i}); return false;">${i}</a>`;
-        ordersPagination.appendChild(li);
-    }
-    
-    // Кнопка "Вперед"
-    const nextLi = document.createElement('li');
-    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-    nextLi.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">Вперед</a>`;
-    ordersPagination.appendChild(nextLi);
-}
-
-// Вспомогательные функции
-function getCourseName(courseId) {
-    // Пока сделаем простой вызов API для получения деталей курса
-    // В реальном приложении мы можем кэшировать эти данные
-    return `Курс ID: ${courseId}`;
-}
-
-function getTutorName(tutorId) {
-    // Пока сделаем простой вызов API для получения деталей репетитора
-    // В реальном приложении мы можем кэшировать эти данные
-    return `Репетитор ID: ${tutorId}`;
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU');
-}
-
-function getHourSuffix(hours) {
-    if (hours % 10 === 1 && hours % 100 !== 11) {
-        return '';
-    } else if (hours % 10 >= 2 && hours % 10 <= 4 && (hours % 100 < 10 || hours % 100 >= 20)) {
-        return 'а';
-    } else {
-        return 'ов';
-    }
-}
-
-function getStudentSuffix(students) {
-    if (students === 1) return '';
-    if (students >= 2 && students <= 4) return 'а';
-    return 'ов';
-}
-
-function showNotification(message, type = 'info', duration = 5000) {
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} notification alert-dismissible fade show`;
-    notification.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    notificationArea.appendChild(notification);
-    
-    // Автоматическое закрытие через duration
-    if (duration > 0) {
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
+        <div class="mb-3">
+            <strong>Курс/Репетитор:</strong> ${courseName}
+        </div>
+        <div class="mb-3">
+            <strong>Дата начала:</strong> ${formatDate(order.date_start)}
+        </div>
+        <div class="mb-3">
+            <strong>Время:</strong> ${order.time_start}
+        </div>
+        <div class="mb-3">
+            <strong>Продолжительность:</strong> ${order.duration} ч.
+        </div>
+        <div class="mb-3">
+            <strong>Количество студентов:</strong> ${order.persons}
+        </div>
+        <div class="mb-3">
+            <strong>Выбранные опции:</strong>
+            ${
+              options.length > 0
+                ? '<ul class="mb-0"><li>' +
+                  options.join('</li><li>') +
+                  '</li></ul>'
+                : 'Нет'
             }
-        }, duration);
-    }
-}
-
-// Функции модальных окон
-async function showOrderDetails(orderId) {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-    
-    let detailsHtml = `
-        <div class="row">
-            <div class="col-md-6">
-                <h6>Основная информация</h6>
-                <table class="table table-sm">
-                    <tr><td><strong>ID заказа:</strong></td><td>${order.id}</td></tr>
-                    <tr><td><strong>Тип:</strong></td><td>${order.course_id ? 'Курс' : 'Репетитор'}</td></tr>
-                    <tr><td><strong>Название:</strong></td><td>${order.course_id ? getCourseName(order.course_id) : getTutorName(order.tutor_id)}</td></tr>
-                    <tr><td><strong>Дата начала:</strong></td><td>${formatDate(order.date_start)}</td></tr>
-                    <tr><td><strong>Время начала:</strong></td><td>${order.time_start}</td></tr>
-                    <tr><td><strong>Продолжительность:</strong></td><td>${order.duration} час${getHourSuffix(order.duration)}</td></tr>
-                    <tr><td><strong>Количество студентов:</strong></td><td>${order.persons}</td></tr>
-                    <tr><td><strong>Общая стоимость:</strong></td><td>${order.price.toLocaleString()} руб.</td></tr>
-                </table>
-            </div>
-            <div class="col-md-6">
-                <h6>Дополнительные опции</h6>
-                <div class="list-group">
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Ранняя регистрация
-                        <span class="badge ${order.early_registration ? 'bg-success' : 'bg-secondary'}">${order.early_registration ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Групповая запись
-                        <span class="badge ${order.group_enrollment ? 'bg-success' : 'bg-secondary'}">${order.group_enrollment ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Интенсивный курс
-                        <span class="badge ${order.intensive_course ? 'bg-success' : 'bg-secondary'}">${order.intensive_course ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Дополнительные материалы
-                        <span class="badge ${order.supplementary ? 'bg-success' : 'bg-secondary'}">${order.supplementary ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Индивидуальные занятия
-                        <span class="badge ${order.personalized ? 'bg-success' : 'bg-secondary'}">${order.personalized ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Культурные экскурсии
-                        <span class="badge ${order.excursions ? 'bg-success' : 'bg-secondary'}">${order.excursions ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Оценка уровня
-                        <span class="badge ${order.assessment ? 'bg-success' : 'bg-secondary'}">${order.assessment ? 'Да' : 'Нет'}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        Интерактивная платформа
-                        <span class="badge ${order.interactive ? 'bg-success' : 'bg-secondary'}">${order.interactive ? 'Да' : 'Нет'}</span>
-                    </div>
-                </div>
-            </div>
         </div>
-    `;
-    
-    document.getElementById('orderDetailsContent').innerHTML = detailsHtml;
-    
-    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
-    modal.show();
+        <div class="mb-0 p-2 bg-light rounded">
+            <strong>Итоговая стоимость:</strong> ${order.price} руб.
+        </div>
+    `
+
+  new bootstrap.Modal(document.getElementById('detailsModal')).show()
 }
 
-async function editOrder(orderId) {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-    
-    currentOrderId = orderId;
-    
-    let editHtml = `
-        <form id="editOrderForm">
-            <input type="hidden" id="editOrderId" value="${order.id}">
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Тип заказа</label>
-                    <input type="text" class="form-control" value="${order.course_id ? 'Курс' : 'Репетитор'}" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Название</label>
-                    <input type="text" class="form-control" value="${order.course_id ? getCourseName(order.course_id) : getTutorName(order.tutor_id)}" readonly>
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="editStartDate" class="form-label">Дата начала</label>
-                    <input type="date" class="form-control" id="editStartDate" value="${order.date_start}" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="editStartTime" class="form-label">Время начала</label>
-                    <input type="time" class="form-control" id="editStartTime" value="${order.time_start}" required>
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="editDuration" class="form-label">Продолжительность (часы)</label>
-                    <input type="number" class="form-control" id="editDuration" min="1" max="40" value="${order.duration}" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="editPersons" class="form-label">Количество студентов</label>
-                    <input type="number" class="form-control" id="editPersons" min="1" max="20" value="${order.persons}" required>
-                </div>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Дополнительные опции</label>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editEarlyRegistration" ${order.early_registration ? 'checked' : ''}>
-                            <label class="form-check-label" for="editEarlyRegistration">
-                                Ранняя регистрация
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editGroupEnrollment" ${order.group_enrollment ? 'checked' : ''}>
-                            <label class="form-check-label" for="editGroupEnrollment">
-                                Групповая запись
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editIntensiveCourse" ${order.intensive_course ? 'checked' : ''}>
-                            <label class="form-check-label" for="editIntensiveCourse">
-                                Интенсивный курс
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editSupplementary" ${order.supplementary ? 'checked' : ''}>
-                            <label class="form-check-label" for="editSupplementary">
-                                Дополнительные материалы
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editPersonalized" ${order.personalized ? 'checked' : ''}>
-                            <label class="form-check-label" for="editPersonalized">
-                                Индивидуальные занятия
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editExcursions" ${order.excursions ? 'checked' : ''}>
-                            <label class="form-check-label" for="editExcursions">
-                                Культурные экскурсии
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editAssessment" ${order.assessment ? 'checked' : ''}>
-                            <label class="form-check-label" for="editAssessment">
-                                Оценка уровня
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="editInteractive" ${order.interactive ? 'checked' : ''}>
-                            <label class="form-check-label" for="editInteractive">
-                                Интерактивная платформа
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    `;
-    
-    document.getElementById('editOrderContent').innerHTML = editHtml;
-    
-    const modal = new bootstrap.Modal(document.getElementById('editOrderModal'));
-    modal.show();
-}
+function showEditModal(orderId) {
+  const order = allOrders.find(function (o) {
+    return o.id === orderId
+  })
+  if (!order) return
 
-async function saveOrderChanges() {
-    if (!currentOrderId) return;
+  currentEditOrder = order
+
+  const editOrderId = document.getElementById('edit-order-id')
+  const editCourseId = document.getElementById('edit-course-id')
+  const editTutorId = document.getElementById('edit-tutor-id')
+  
+  if (editOrderId) editOrderId.value = order.id
+  if (editCourseId) editCourseId.value = order.course_id || 0
+  if (editTutorId) editTutorId.value = order.tutor_id || 0
+
+  const courseOrTutor = getCourseOrTutor(order)
+  const dateSelect = document.getElementById('edit-start-date')
+  const timeSelect = document.getElementById('edit-start-time')
+
+  if (!dateSelect || !timeSelect) return
+
+  if (order.course_id && order.course_id !== 0 && courseOrTutor) {
+    const editCourseName = document.getElementById('edit-course-name')
+    const editTeacherName = document.getElementById('edit-teacher-name')
+    const editDuration = document.getElementById('edit-duration')
     
-    const order = orders.find(o => o.id === currentOrderId);
-    if (!order) return;
-    
-    const updatedOrder = {
-        ...order,
-        date_start: document.getElementById('editStartDate').value,
-        time_start: document.getElementById('editStartTime').value,
-        duration: parseInt(document.getElementById('editDuration').value),
-        persons: parseInt(document.getElementById('editPersons').value),
-        early_registration: document.getElementById('editEarlyRegistration').checked,
-        group_enrollment: document.getElementById('editGroupEnrollment').checked,
-        intensive_course: document.getElementById('editIntensiveCourse').checked,
-        supplementary: document.getElementById('editSupplementary').checked,
-        personalized: document.getElementById('editPersonalized').checked,
-        excursions: document.getElementById('editExcursions').checked,
-        assessment: document.getElementById('editAssessment').checked,
-        interactive: document.getElementById('editInteractive').checked
-    };
-    
-    const result = await putData(`/api/orders/${currentOrderId}`, updatedOrder);
-    
-    if (result) {
-        showNotification('Заказ успешно обновлен!', 'success');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editOrderModal'));
-        modal.hide();
-        loadOrders(); // Перезагрузка заказов для отражения изменений
+    if (editCourseName) editCourseName.value = courseOrTutor.name
+    if (editTeacherName) editTeacherName.value = courseOrTutor.teacher
+    if (editDuration) editDuration.value = courseOrTutor.total_length + ' недель'
+
+    dateSelect.innerHTML = ''
+    if (courseOrTutor.start_dates) {
+      const uniqueDates = [
+        ...new Set(
+          courseOrTutor.start_dates.map(function (dt) {
+            return dt.split('T')[0]
+          })
+        ),
+      ]
+      uniqueDates.forEach(function (date) {
+        const option = document.createElement('option')
+        option.value = date
+        option.textContent = formatDate(date)
+        option.selected = date === order.date_start
+        dateSelect.appendChild(option)
+      })
     }
-}
 
-function confirmDelete(orderId) {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
+    populateEditTimes(order.date_start, order.time_start)
+  } else if (order.tutor_id && order.tutor_id !== 0 && courseOrTutor) {
+    const editCourseName = document.getElementById('edit-course-name')
+    const editTeacherName = document.getElementById('edit-teacher-name')
+    const editDuration = document.getElementById('edit-duration')
     
-    document.getElementById('deleteOrderInfo').innerHTML = `
-        <strong>Заказ:</strong> ${order.course_id ? getCourseName(order.course_id) : getTutorName(order.tutor_id)}<br>
-        <strong>Дата:</strong> ${formatDate(order.date_start)}<br>
-        <strong>Стоимость:</strong> ${order.price.toLocaleString()} руб.
-    `;
-    
-    currentOrderId = orderId;
-    
-    const modal = new bootstrap.Modal(document.getElementById('deleteOrderModal'));
-    modal.show();
-}
+    if (editCourseName) editCourseName.value = 'Занятие с репетитором'
+    if (editTeacherName) editTeacherName.value = courseOrTutor.name
+    if (editDuration) editDuration.value = order.duration + ' ч.'
 
-async function confirmDeleteOrder() {
-    if (!currentOrderId) return;
-    
-    const result = await deleteData(`/api/orders/${currentOrderId}`);
-    
-    if (result) {
-        showNotification('Заказ успешно удален!', 'success');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteOrderModal'));
-        modal.hide();
-        loadOrders(); // Перезагрузка заказов для отражения изменений
+    dateSelect.innerHTML = ''
+    const today = new Date()
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today)
+      date.setDate(today.getDate() + i)
+      const dateStr = date.toISOString().split('T')[0]
+      const option = document.createElement('option')
+      option.value = dateStr
+      option.textContent = formatDate(dateStr)
+      option.selected = dateStr === order.date_start
+      dateSelect.appendChild(option)
     }
+
+    const times = [
+      '09:00',
+      '10:00',
+      '11:00',
+      '12:00',
+      '14:00',
+      '15:00',
+      '16:00',
+      '17:00',
+      '18:00',
+      '19:00',
+    ]
+    timeSelect.innerHTML = ''
+    times.forEach(function (time) {
+      const option = document.createElement('option')
+      option.value = time
+      option.textContent = time
+      option.selected = time === order.time_start
+      timeSelect.appendChild(option)
+    })
+  }
+
+  const editStudents = document.getElementById('edit-students')
+  if (editStudents) editStudents.value = order.persons
+
+  const editOptionSupplementary = document.getElementById('edit-option-supplementary')
+  const editOptionPersonalized = document.getElementById('edit-option-personalized')
+  const editOptionExcursions = document.getElementById('edit-option-excursions')
+  const editOptionAssessment = document.getElementById('edit-option-assessment')
+  const editOptionInteractive = document.getElementById('edit-option-interactive')
+
+  if (editOptionSupplementary) editOptionSupplementary.checked = order.supplementary
+  if (editOptionPersonalized) editOptionPersonalized.checked = order.personalized
+  if (editOptionExcursions) editOptionExcursions.checked = order.excursions
+  if (editOptionAssessment) editOptionAssessment.checked = order.assessment
+  if (editOptionInteractive) editOptionInteractive.checked = order.interactive
+
+  calculateEditTotalCost()
+
+  new bootstrap.Modal(document.getElementById('editModal')).show()
 }
 
-// Функции пагинации
-function changePage(page) {
-    const totalPages = Math.ceil(orders.length / itemsPerPage);
-    
-    if (page < 1) page = 1;
-    if (page > totalPages) page = totalPages;
-    
-    currentPage = page;
-    renderOrders();
+function populateEditTimes(selectedDate, currentTime) {
+  const timeSelect = document.getElementById('edit-start-time')
+  const courseOrTutor = getCourseOrTutor(currentEditOrder)
+
+  if (!timeSelect) return
+
+  timeSelect.innerHTML = ''
+
+  if (
+    currentEditOrder.course_id &&
+    courseOrTutor &&
+    courseOrTutor.start_dates
+  ) {
+    const timesForDate = courseOrTutor.start_dates
+      .filter(function (dt) {
+        return dt.startsWith(selectedDate)
+      })
+      .map(function (dt) {
+        return dt.split('T')[1].substring(0, 5)
+      })
+
+    timesForDate.forEach(function (time) {
+      const option = document.createElement('option')
+      option.value = time
+      option.textContent = time
+      option.selected = time === currentTime
+      timeSelect.appendChild(option)
+    })
+  }
 }
 
-// Экспорт функций в глобальную область видимости для обработчиков onclick
-window.changePage = changePage;
-window.showOrderDetails = showOrderDetails;
-window.editOrder = editOrder;
-window.saveOrderChanges = saveOrderChanges;
-window.confirmDelete = confirmDelete;
-window.confirmDeleteOrder = confirmDeleteOrder;
+function handleEditDateChange() {
+  const selectedDate = document.getElementById('edit-start-date')?.value
+  if (!selectedDate) return
+  
+  populateEditTimes(selectedDate, null)
+  calculateEditTotalCost()
+}
+
+function calculateEditTotalCost() {
+  if (!currentEditOrder) return
+
+  const dateValue = document.getElementById('edit-start-date')?.value
+  const timeValue = document.getElementById('edit-start-time')?.value
+  const studentsCount = parseInt(document.getElementById('edit-students')?.value) || 1
+
+  const supplementary = document.getElementById('edit-option-supplementary')?.checked
+  const personalized = document.getElementById('edit-option-personalized')?.checked
+  const excursions = document.getElementById('edit-option-excursions')?.checked
+  const assessment = document.getElementById('edit-option-assessment')?.checked
+  const interactive = document.getElementById('edit-option-interactive')?.checked
+
+  const courseOrTutor = getCourseOrTutor(currentEditOrder)
+
+  let courseFeePerHour = 0
+  let durationInHours = 0
+  let totalWeeks = 0
+  let weeklyHours = 0
+
+  if (currentEditOrder.course_id && courseOrTutor) {
+    courseFeePerHour = courseOrTutor.course_fee_per_hour
+    totalWeeks = courseOrTutor.total_length
+    weeklyHours = courseOrTutor.week_length
+    durationInHours = totalWeeks * weeklyHours
+  } else if (currentEditOrder.tutor_id && courseOrTutor) {
+    courseFeePerHour = courseOrTutor.price_per_hour
+    durationInHours = currentEditOrder.duration || 1
+    totalWeeks = 1
+    weeklyHours = durationInHours
+  }
+
+  let baseCost = courseFeePerHour * durationInHours
+
+  let isWeekend = false
+  if (dateValue) {
+    const date = new Date(dateValue)
+    const dayOfWeek = date.getDay()
+    isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+  }
+
+  if (isWeekend) {
+    baseCost *= 1.5
+  }
+
+  let morningSurcharge = 0
+  let eveningSurcharge = 0
+  if (timeValue) {
+    const hour = parseInt(timeValue.split(':')[0])
+    if (hour >= 9 && hour < 12) {
+      morningSurcharge = 400
+    }
+    if (hour >= 18 && hour < 20) {
+      eveningSurcharge = 1000
+    }
+  }
+
+  let totalCost = baseCost + morningSurcharge + eveningSurcharge
+
+  if (supplementary) {
+    totalCost += 2000 * studentsCount
+  }
+  if (personalized) {
+    totalCost += 1500 * totalWeeks
+  }
+  if (excursions) {
+    totalCost *= 1.25
+  }
+  if (assessment) {
+    totalCost += 300
+  }
+  if (interactive) {
+    totalCost *= 1.5
+  }
+
+  const isIntensive = weeklyHours >= 5
+  if (isIntensive) {
+    totalCost *= 1.2
+  }
+
+  let isEarlyRegistration = false
+  if (dateValue) {
+    const startDate = new Date(dateValue)
+    const today = new Date()
+    const diffTime = startDate - today
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    isEarlyRegistration = diffDays >= 30
+  }
+
+  if (isEarlyRegistration) {
+    totalCost *= 0.9
+  }
+
+  const isGroupEnrollment = studentsCount >= 5
+  if (isGroupEnrollment) {
+    totalCost *= 0.85
+  }
+
+  totalCost *= studentsCount
+
+  const editTotalCost = document.getElementById('edit-total-cost')
+  if (editTotalCost) editTotalCost.textContent = Math.round(totalCost)
+
+  const editBadgeWeekend = document.getElementById('edit-badge-weekend')
+  const editBadgeMorning = document.getElementById('edit-badge-morning')
+  const editBadgeEvening = document.getElementById('edit-badge-evening')
+  const editBadgeIntensive = document.getElementById('edit-badge-intensive')
+  const editBadgeEarly = document.getElementById('edit-badge-early')
+  const editBadgeGroup = document.getElementById('edit-badge-group')
+
+  if (editBadgeWeekend) editBadgeWeekend.style.display = isWeekend ? 'inline-block' : 'none'
+  if (editBadgeMorning) editBadgeMorning.style.display = morningSurcharge > 0 ? 'inline-block' : 'none'
+  if (editBadgeEvening) editBadgeEvening.style.display = eveningSurcharge > 0 ? 'inline-block' : 'none'
+  if (editBadgeIntensive) editBadgeIntensive.style.display = isIntensive ? 'inline-block' : 'none'
+  if (editBadgeEarly) editBadgeEarly.style.display = isEarlyRegistration ? 'inline-block' : 'none'
+  if (editBadgeGroup) editBadgeGroup.style.display = isGroupEnrollment ? 'inline-block' : 'none'
+}
+
+async function saveEdit() {
+  const orderId = parseInt(document.getElementById('edit-order-id')?.value)
+  const dateValue = document.getElementById('edit-start-date')?.value
+  const timeValue = document.getElementById('edit-start-time')?.value
+  const studentsCount = parseInt(document.getElementById('edit-students')?.value) || 1
+  const totalCost = parseInt(document.getElementById('edit-total-cost')?.textContent || 0)
+
+  if (!dateValue || !timeValue) {
+    showNotification('Выберите дату и время', 'warning')
+    return
+  }
+
+  if (studentsCount < 1 || studentsCount > 20) {
+    showNotification('Количество студентов должно быть от 1 до 20', 'warning')
+    return
+  }
+
+  const orderData = {
+    course_id: parseInt(document.getElementById('edit-course-id')?.value) || 0,
+    tutor_id: parseInt(document.getElementById('edit-tutor-id')?.value) || 0,
+    date_start: dateValue,
+    time_start: timeValue,
+    duration: currentEditOrder.duration,
+    persons: studentsCount,
+    price: totalCost,
+    early_registration: document.getElementById('edit-badge-early')?.style.display !== 'none',
+    group_enrollment: document.getElementById('edit-badge-group')?.style.display !== 'none',
+    intensive_course: document.getElementById('edit-badge-intensive')?.style.display !== 'none',
+    supplementary: document.getElementById('edit-option-supplementary')?.checked,
+    personalized: document.getElementById('edit-option-personalized')?.checked,
+    excursions: document.getElementById('edit-option-excursions')?.checked,
+    assessment: document.getElementById('edit-option-assessment')?.checked,
+    interactive: document.getElementById('edit-option-interactive')?.checked,
+  }
+
+  try {
+    const saveEditBtn = document.getElementById('save-edit-btn')
+    if (saveEditBtn) saveEditBtn.disabled = true
+    
+    await updateOrder(orderId, orderData)
+    showNotification('Заявка успешно обновлена', 'success')
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'))
+    if (modal) {
+      modal.hide()
+    }
+    
+    await loadData()
+  } catch (error) {
+    showNotification('Ошибка при обновлении: ' + error.message, 'danger')
+  } finally {
+    const saveEditBtn = document.getElementById('save-edit-btn')
+    if (saveEditBtn) saveEditBtn.disabled = false
+  }
+}
+
+function showDeleteModal(orderId) {
+  const deleteOrderId = document.getElementById('delete-order-id')
+  if (deleteOrderId) deleteOrderId.value = orderId
+  
+  new bootstrap.Modal(document.getElementById('deleteModal')).show()
+}
+
+async function confirmDelete() {
+  const orderId = parseInt(document.getElementById('delete-order-id')?.value)
+
+  try {
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn')
+    if (confirmDeleteBtn) confirmDeleteBtn.disabled = true
+    
+    await deleteOrder(orderId)
+    showNotification('Заявка успешно удалена', 'success')
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'))
+    if (modal) {
+      modal.hide()
+    }
+    
+    await loadData()
+  } catch (error) {
+    showNotification('Ошибка при удалении: ' + error.message, 'danger')
+  } finally {
+    const confirmDeleteBtn = document.getElementById('confirm-delete-btn')
+    if (confirmDeleteBtn) confirmDeleteBtn.disabled = false
+  }
+}
+
+function showNotification(message, type) {
+  const container = document.getElementById('notification-area') || document.getElementById('notificationArea')
+  if (!container) return
+
+  const alertId = 'alert-' + Date.now()
+
+  const alertHtml = `
+        <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `
+
+  container.insertAdjacentHTML('beforeend', alertHtml)
+
+  setTimeout(function () {
+    const alert = document.getElementById(alertId)
+    if (alert) {
+      alert.remove()
+    }
+  }, 5000)
+}
+
+function formatDate(dateStr) {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
