@@ -15,32 +15,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function setupEventListeners() {
   document
-    .getElementById('course-search-form')
+    .getElementById('courseSearchForm')
     .addEventListener('submit', function (e) {
       e.preventDefault()
       filterCourses()
     })
 
   document
-    .getElementById('course-search-name')
-    .addEventListener('input', filterCourses)
+    .getElementById('searchLevel')
+    .addEventListener('change', filterCourses)
   document
-    .getElementById('course-search-level')
+    .getElementById('searchWeekLength')
+    .addEventListener('change', filterCourses)
+  document
+    .getElementById('searchDuration')
     .addEventListener('change', filterCourses)
 
   document
-    .getElementById('tutor-search-form')
+    .getElementById('tutorSearchForm')
     .addEventListener('submit', function (e) {
       e.preventDefault()
       filterTutors()
     })
 
   document
-    .getElementById('tutor-search-level')
+    .getElementById('tutorLanguage')
     .addEventListener('change', filterTutors)
   document
-    .getElementById('tutor-search-experience')
-    .addEventListener('input', filterTutors)
+    .getElementById('tutorLevel')
+    .addEventListener('change', filterTutors)
+  document
+    .getElementById('tutorExperience')
+    .addEventListener('change', filterTutors)
 
   document
     .getElementById('order-start-date')
@@ -68,47 +74,47 @@ function setupEventListeners() {
 }
 
 async function loadCourses() {
-  const coursesList = document.getElementById('courses-list')
-  coursesList.innerHTML =
-    '<div class="spinner-container"><div class="spinner-border text-primary"></div></div>'
+  const coursesContainer = document.getElementById('coursesContainer')
+  coursesContainer.innerHTML =
+    '<div class="col-12"><div class="spinner-container"><div class="spinner-border text-primary"></div></div></div>'
 
   try {
     allCourses = await getCourses()
     filteredCourses = [...allCourses]
     renderCourses()
   } catch (error) {
-    coursesList.innerHTML =
-      '<div class="empty-state"><p>Ошибка загрузки курсов</p></div>'
+    coursesContainer.innerHTML =
+      '<div class="col-12"><div class="empty-state"><p>Ошибка загрузки курсов</p></div></div>'
     showNotification('Ошибка загрузки курсов: ' + error.message, 'danger')
   }
 }
 
 async function loadTutors() {
-  const tutorsBody = document.getElementById('tutors-table-body')
-  tutorsBody.innerHTML =
-    '<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary"></div></td></tr>'
+  const tutorsContainer = document.getElementById('tutorsContainer')
+  tutorsContainer.innerHTML =
+    '<div class="col-12"><div class="spinner-container"><div class="spinner-border text-primary"></div></div></div>'
 
   try {
     allTutors = await getTutors()
     filteredTutors = [...allTutors]
     renderTutors()
   } catch (error) {
-    tutorsBody.innerHTML =
-      '<tr><td colspan="6" class="text-center text-muted">Ошибка загрузки репетиторов</td></tr>'
+    tutorsContainer.innerHTML =
+      '<div class="col-12"><div class="empty-state"><p>Ошибка загрузки репетиторов</p></div></div>'
     showNotification('Ошибка загрузки репетиторов: ' + error.message, 'danger')
   }
 }
 
 function filterCourses() {
-  const searchName = document
-    .getElementById('course-search-name')
-    .value.toLowerCase()
-  const searchLevel = document.getElementById('course-search-level').value
+  const searchLevel = document.getElementById('searchLevel').value
+  const searchWeekLength = document.getElementById('searchWeekLength').value
+  const searchDuration = document.getElementById('searchDuration').value
 
   filteredCourses = allCourses.filter(function (course) {
-    const matchesName = course.name.toLowerCase().includes(searchName)
     const matchesLevel = !searchLevel || course.level === searchLevel
-    return matchesName && matchesLevel
+    const matchesWeekLength = !searchWeekLength || course.week_length.toString() === searchWeekLength
+    const matchesDuration = !searchDuration || course.total_length.toString() === searchDuration
+    return matchesLevel && matchesWeekLength && matchesDuration
   })
 
   currentCoursePage = 1
@@ -116,76 +122,71 @@ function filterCourses() {
 }
 
 function filterTutors() {
-  const searchLevel = document.getElementById('tutor-search-level').value
-  const searchExperience =
-    parseInt(document.getElementById('tutor-search-experience').value) || 0
+  const searchLanguage = document.getElementById('tutorLanguage').value
+  const searchLevel = document.getElementById('tutorLevel').value
+  const searchExperience = document.getElementById('tutorExperience').value
 
   filteredTutors = allTutors.filter(function (tutor) {
+    const matchesLanguage = !searchLanguage || tutor.languages_offered.includes(searchLanguage)
     const matchesLevel = !searchLevel || tutor.language_level === searchLevel
-    const matchesExperience = tutor.work_experience >= searchExperience
-    return matchesLevel && matchesExperience
+    
+    let matchesExperience = true
+    if (searchExperience) {
+      const exp = tutor.work_experience
+      if (searchExperience === '1-3') matchesExperience = exp >= 1 && exp <= 3
+      else if (searchExperience === '4-6') matchesExperience = exp >= 4 && exp <= 6
+      else if (searchExperience === '7+') matchesExperience = exp >= 7
+    }
+    
+    return matchesLanguage && matchesLevel && matchesExperience
   })
 
   renderTutors()
 }
 
 function renderCourses() {
-  const coursesList = document.getElementById('courses-list')
+  const coursesContainer = document.getElementById('coursesContainer')
   const totalPages = Math.ceil(filteredCourses.length / ITEMS_PER_PAGE)
   const startIndex = (currentCoursePage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
   const coursesToShow = filteredCourses.slice(startIndex, endIndex)
 
   if (coursesToShow.length === 0) {
-    coursesList.innerHTML =
-      '<div class="empty-state"><p>Курсы не найдены</p></div>'
-    document.getElementById('courses-pagination').innerHTML = ''
+    coursesContainer.innerHTML =
+      '<div class="col-12"><div class="empty-state"><p>Курсы не найдены</p></div></div>'
+    document.getElementById('coursesPagination').innerHTML = ''
     return
   }
 
-  coursesList.innerHTML = coursesToShow
+  coursesContainer.innerHTML = coursesToShow
     .map(function (course) {
       const isSelected = selectedCourse && selectedCourse.id === course.id
       return `
-            <div class="list-group-item ${
-              isSelected ? 'selected' : ''
-            }" data-course-id="${course.id}">
-                <div class="course-item">
-                    <div class="course-info">
-                        <h5 class="mb-1">${course.name}</h5>
-                        <p class="mb-1 text-truncate-2">${
-                          course.description
-                        }</p>
-                        <div class="course-meta">
-                            <span><strong>Уровень:</strong> ${translateLevel(
-                              course.level
-                            )}</span>
-                            <span><strong>Преподаватель:</strong> ${
-                              course.teacher
-                            }</span>
-                            <span><strong>Длительность:</strong> ${
-                              course.total_length
-                            } нед.</span>
-                            <span><strong>Цена:</strong> ${
-                              course.course_fee_per_hour
-                            } руб/час</span>
-                        </div>
-                    </div>
-                    <div class="course-actions">
-                        <button class="btn btn-outline-primary btn-sm select-course-btn">
-                            ${isSelected ? 'Выбран' : 'Выбрать'}
-                        </button>
-                    </div>
-                </div>
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 course-card ${isSelected ? 'border-primary' : ''}" data-course-id="${course.id}">
+            <div class="card-body">
+              <h5 class="card-title">${course.name}</h5>
+              <p class="card-text text-truncate-2">${course.description}</p>
+              <div class="course-meta mb-3">
+                <div><strong>Уровень:</strong> ${translateLevel(course.level)}</div>
+                <div><strong>Преподаватель:</strong> ${course.teacher}</div>
+                <div><strong>Длительность:</strong> ${course.total_length} нед.</div>
+                <div><strong>Цена:</strong> ${course.course_fee_per_hour} руб/час</div>
+              </div>
+              <button class="btn ${isSelected ? 'btn-success' : 'btn-outline-primary'} btn-sm select-course-btn w-100">
+                ${isSelected ? 'Выбран' : 'Выбрать курс'}
+              </button>
             </div>
-        `
+          </div>
+        </div>
+      `
     })
     .join('')
 
-  coursesList.querySelectorAll('.list-group-item').forEach(function (item) {
-    item.addEventListener('click', function (e) {
+  coursesContainer.querySelectorAll('.course-card').forEach(function (card) {
+    card.addEventListener('click', function (e) {
       if (!e.target.classList.contains('select-course-btn')) return
-      const courseId = parseInt(item.dataset.courseId)
+      const courseId = parseInt(card.dataset.courseId)
       selectCourse(courseId)
     })
   })
@@ -194,7 +195,7 @@ function renderCourses() {
 }
 
 function renderCoursesPagination(totalPages) {
-  const pagination = document.getElementById('courses-pagination')
+  const pagination = document.getElementById('coursesPagination')
 
   if (totalPages <= 1) {
     pagination.innerHTML = ''
@@ -238,40 +239,42 @@ function renderCoursesPagination(totalPages) {
 }
 
 function renderTutors() {
-  const tutorsBody = document.getElementById('tutors-table-body')
+  const tutorsContainer = document.getElementById('tutorsContainer')
 
   if (filteredTutors.length === 0) {
-    tutorsBody.innerHTML =
-      '<tr><td colspan="6" class="text-center text-muted">Репетиторы не найдены</td></tr>'
+    tutorsContainer.innerHTML =
+      '<div class="col-12"><div class="empty-state"><p>Репетиторы не найдены</p></div></div>'
     return
   }
 
-  tutorsBody.innerHTML = filteredTutors
+  tutorsContainer.innerHTML = filteredTutors
     .map(function (tutor) {
       const isSelected = selectedTutor && selectedTutor.id === tutor.id
       return `
-            <tr class="${
-              isSelected ? 'selected' : ''
-            }" data-tutor-id="${tutor.id}">
-                <td>${tutor.name}</td>
-                <td>${translateLevel(tutor.language_level)}</td>
-                <td>${tutor.languages_offered.join(', ')}</td>
-                <td>${tutor.work_experience}</td>
-                <td>${tutor.price_per_hour}</td>
-                <td>
-                    <button class="btn btn-outline-primary btn-sm select-tutor-btn">
-                        ${isSelected ? 'Выбран' : 'Выбрать'}
-                    </button>
-                </td>
-            </tr>
-        `
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card h-100 tutor-card ${isSelected ? 'border-primary' : ''}" data-tutor-id="${tutor.id}">
+            <div class="card-body">
+              <h5 class="card-title">${tutor.name}</h5>
+              <div class="tutor-info mb-2">
+                <div><strong>Уровень:</strong> ${translateLevel(tutor.language_level)}</div>
+                <div><strong>Опыт:</strong> ${tutor.work_experience} лет</div>
+                <div><strong>Языки:</strong> ${tutor.languages_offered.join(', ')}</div>
+                <div><strong>Цена:</strong> ${tutor.price_per_hour} руб/час</div>
+              </div>
+              <button class="btn ${isSelected ? 'btn-success' : 'btn-outline-primary'} btn-sm select-tutor-btn w-100">
+                ${isSelected ? 'Выбран' : 'Выбрать репетитора'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `
     })
     .join('')
 
-  tutorsBody.querySelectorAll('tr').forEach(function (row) {
-    row.addEventListener('click', function (e) {
+  tutorsContainer.querySelectorAll('.tutor-card').forEach(function (card) {
+    card.addEventListener('click', function (e) {
       if (!e.target.classList.contains('select-tutor-btn')) return
-      const tutorId = parseInt(row.dataset.tutorId)
+      const tutorId = parseInt(card.dataset.tutorId)
       selectTutor(tutorId)
     })
   })

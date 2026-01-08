@@ -136,23 +136,36 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title mb-3">Поиск курсов</h5>
-                            <form id="course-search-form" class="row g-3">
+                            <form id="courseSearchForm" class="row g-3">
                                 <div class="col-md-4">
-                                    <label for="course-search-name" class="form-label">Название</label>
-                                    <input type="text" class="form-control" id="course-search-name"
-                                        placeholder="Введите название курса">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="course-search-level" class="form-label">Уровень</label>
-                                    <select class="form-select" id="course-search-level">
+                                    <label for="searchLevel" class="form-label">Уровень</label>
+                                    <select class="form-select" id="searchLevel">
                                         <option value="">Все уровни</option>
                                         <option value="Beginner">Начальный</option>
                                         <option value="Intermediate">Средний</option>
                                         <option value="Advanced">Продвинутый</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary w-100">Поиск</button>
+                                <div class="col-md-4">
+                                    <label for="searchWeekLength" class="form-label">Занятий в неделю</label>
+                                    <select class="form-select" id="searchWeekLength">
+                                        <option value="">Все</option>
+                                        <option value="1">1 час</option>
+                                        <option value="2">2 часа</option>
+                                        <option value="3">3 часа</option>
+                                        <option value="4">4 часа</option>
+                                        <option value="5">5 часов</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="searchDuration" class="form-label">Продолжительность</label>
+                                    <select class="form-select" id="searchDuration">
+                                        <option value="">Все</option>
+                                        <option value="8">8 недель</option>
+                                        <option value="12">12 недель</option>
+                                        <option value="16">16 недель</option>
+                                        <option value="24">24 недели</option>
+                                    </select>
                                 </div>
                             </form>
                         </div>
@@ -160,8 +173,8 @@
                 </div>
             </div>
 
-            <!-- Список курсов -->
-            <div class="list-group" id="courses-list">
+            <!-- Сетка курсов -->
+            <div class="row" id="coursesContainer">
                 <!-- Курсы будут загружены здесь -->
             </div>
 
@@ -169,7 +182,7 @@
             <div class="row mt-4">
                 <div class="col-12">
                     <nav aria-label="Courses pagination">
-                        <ul class="pagination justify-content-center" id="courses-pagination">
+                        <ul class="pagination justify-content-center" id="coursesPagination">
                             <!-- Пагинация будет сгенерирована здесь -->
                         </ul>
                     </nav>
@@ -187,21 +200,36 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title mb-3">Найти репетитора</h5>
-                            <form id="tutor-search-form" class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="tutor-search-level" class="form-label">Уровень</label>
-                                    <select class="form-select" id="tutor-search-level">
+                            <form id="tutorSearchForm" class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="tutorLanguage" class="form-label">Язык</label>
+                                    <select class="form-select" id="tutorLanguage">
+                                        <option value="">Все языки</option>
+                                        <option value="English">Английский</option>
+                                        <option value="Spanish">Испанский</option>
+                                        <option value="French">Французский</option>
+                                        <option value="German">Немецкий</option>
+                                        <option value="Italian">Итальянский</option>
+                                        <option value="Russian">Русский</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="tutorLevel" class="form-label">Уровень</label>
+                                    <select class="form-select" id="tutorLevel">
                                         <option value="">Все уровни</option>
                                         <option value="Beginner">Начальный</option>
                                         <option value="Intermediate">Средний</option>
                                         <option value="Advanced">Продвинутый</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="tutor-search-experience" class="form-label">Минимальный опыт
-                                        (лет)</label>
-                                    <input type="number" class="form-control" id="tutor-search-experience"
-                                        placeholder="0" min="0">
+                                <div class="col-md-4">
+                                    <label for="tutorExperience" class="form-label">Опыт (лет)</label>
+                                    <select class="form-select" id="tutorExperience">
+                                        <option value="">Все</option>
+                                        <option value="1-3">1-3 года</option>
+                                        <option value="4-6">4-6 лет</option>
+                                        <option value="7+">7+ лет</option>
+                                    </select>
                                 </div>
                             </form>
                         </div>
@@ -209,23 +237,9 @@
                 </div>
             </div>
 
-            <!-- Таблица репетиторов -->
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Имя</th>
-                            <th>Уровень</th>
-                            <th>Языки</th>
-                            <th>Опыт (лет)</th>
-                            <th>Цена (руб/час)</th>
-                            <th>Действие</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tutors-table-body">
-                        <!-- Репетиторы будут загружены здесь -->
-                    </tbody>
-                </table>
+            <!-- Сетка репетиторов -->
+            <div class="row" id="tutorsContainer">
+                <!-- Репетиторы будут загружены здесь -->
             </div>
         </section>
 
@@ -246,15 +260,15 @@
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title mb-3">Поиск ресурсов</h5>
-                            <form id="resource-search-form" class="row g-3">
+                            <form id="resourceSearchForm" class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="search-term" class="form-label">Поисковый запрос</label>
-                                    <input type="text" class="form-control" id="search-term"
+                                    <label for="searchTerm" class="form-label">Поисковый запрос</label>
+                                    <input type="text" class="form-control" id="searchTerm"
                                         placeholder="Языковой клуб, библиотека, курсы...">
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="resource-type" class="form-label">Тип ресурса</label>
-                                    <select class="form-select" id="resource-type">
+                                    <label for="resourceType" class="form-label">Тип ресурса</label>
+                                    <select class="form-select" id="resourceType">
                                         <option value="">Все типы</option>
                                         <option value="educational">Образовательные учреждения</option>
                                         <option value="community">Общественные центры</option>
