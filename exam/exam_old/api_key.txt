@@ -1,0 +1,8 @@
+ключ
+605c13e7-9e68-4177-82c9-769249fbe7b8
+
+ссылка на api
+http://exam-api-courses.std-900.ist.mospolytech.ru/
+
+api яндекса
+40304d03-dca3-47a7-9ec8-f137da6c8951
