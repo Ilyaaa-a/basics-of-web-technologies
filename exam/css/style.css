@@ -285,3 +285,58 @@ section {
     color: #198754;
     font-size: 1.25rem;
 }
+
+/* Map section styles */
+#resources-map .card {
+    border-radius: 8px;
+}
+
+#yandexMap {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+#resource-info-container {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#resource-details p {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+#resource-details strong {
+    color: #212529;
+}
+
+#resource-details em {
+    color: #6c757d;
+}
+
+/* Map controls */
+#resourceSearchForm .btn {
+    margin-right: 0.5rem;
+}
+
+/* Responsive map */
+@media (max-width: 768px) {
+    #yandexMap {
+        height: 350px !important;
+    }
+    
+    #resourceSearchForm .col-md-6,
+    #resourceSearchForm .col-md-4 {
+        margin-bottom: 1rem;
+    }
+}

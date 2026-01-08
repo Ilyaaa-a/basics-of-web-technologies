@@ -7,10 +7,130 @@ let selectedCourse = null
 let selectedTutor = null
 const ITEMS_PER_PAGE = 5
 
+// Map variables
+let yandexMap = null
+let mapPlacemarks = []
+let mapObjects = []
+
+// Map resources data
+const mapResources = [
+    {
+        id: 1,
+        name: "Языковой клуб 'Speak Easy'",
+        type: "cafe",
+        address: "г. Москва, ул. Тверская, д. 12",
+        hours: "Пн-Пт: 10:00-22:00, Сб-Вс: 12:00-23:00",
+        phone: "+7 (495) 123-45-67",
+        description: "Разговорные клубы для практики английского языка, тематические вечера, носители языка",
+        coords: [55.764, 37.615],
+        category: "cafe"
+    },
+    {
+        id: 2,
+        name: "Библиотека иностранных языков",
+        type: "library",
+        address: "г. Москва, ул. Новый Арбат, д. 8",
+        hours: "Вт-Вс: 10:00-20:00 (Пн - выходной)",
+        phone: "+7 (495) 234-56-78",
+        description: "Книги, журналы, аудиокниги на иностранных языках, бесплатный доступ к онлайн ресурсам",
+        coords: [55.752, 37.596],
+        category: "library"
+    },
+    {
+        id: 3,
+        name: "Языковая школа 'LinguaPro'",
+        type: "educational",
+        address: "г. Москва, ул. Новый Арбат, д. 15",
+        hours: "Пн-Пт: 9:00-21:00, Сб: 10:00-18:00",
+        phone: "+7 (495) 345-67-89",
+        description: "Курсы английского, немецкого, французского языков. Подготовка к экзаменам IELTS, TOEFL",
+        coords: [55.754, 37.598],
+        category: "educational"
+    },
+    {
+        id: 4,
+        name: "Культурный центр 'Европа'",
+        type: "community",
+        address: "г. Москва, ул. Арбат, д. 20",
+        hours: "Пн-Пт: 10:00-19:00, Сб-Вс: 11:00-18:00",
+        phone: "+7 (495) 456-78-90",
+        description: "Культурные мероприятия, встречи с носителями языка, киноклубы, лекции",
+        coords: [55.748, 37.592],
+        category: "community"
+    },
+    {
+        id: 5,
+        name: "Частная языковая академия 'Global English'",
+        type: "courses",
+        address: "г. Москва, ул. Кутузовский проспект, д. 25",
+        hours: "Пн-Сб: 8:00-22:00, Вс: 10:00-18:00",
+        phone: "+7 (495) 567-89-01",
+        description: "Индивидуальные и групповые занятия, бизнес-английский, подготовка к собеседованиям",
+        coords: [55.739, 37.564],
+        category: "courses"
+    },
+    {
+        id: 6,
+        name: "Кафе языкового обмена 'Language Cafe'",
+        type: "cafe",
+        address: "г. Москва, ул. Пушкинская, д. 5",
+        hours: "Ежедневно: 11:00-23:00",
+        phone: "+7 (495) 678-90-12",
+        description: "Кофе, десерты и общение на разных языках. Тематические вечера по языкам",
+        coords: [55.765, 37.604],
+        category: "cafe"
+    },
+    {
+        id: 7,
+        name: "Городская библиотека №5",
+        type: "library",
+        address: "г. Москва, ул. Зубовский бульвар, д. 15",
+        hours: "Пн-Пт: 9:00-20:00, Сб-Вс: 10:00-18:00",
+        phone: "+7 (495) 789-01-23",
+        description: "Отделение иностранных языков, методическая литература, онлайн доступ",
+        coords: [55.738, 37.592],
+        category: "library"
+    },
+    {
+        id: 8,
+        name: "Образовательный центр 'Мир языков'",
+        type: "educational",
+        address: "г. Москва, ул. Ленинский проспект, д. 40",
+        hours: "Пн-Пт: 10:00-21:00, Сб: 10:00-16:00",
+        phone: "+7 (495) 890-12-34",
+        description: "Курсы испанского, итальянского, китайского языков. Группы всех уровней",
+        coords: [55.731, 37.588],
+        category: "educational"
+    },
+    {
+        id: 9,
+        name: "Комьюнити-центр 'Языковой коворкинг'",
+        type: "community",
+        address: "г. Москва, ул. Большая Дмитровка, д. 10",
+        hours: "Пн-Вс: 9:00-22:00",
+        phone: "+7 (495) 901-23-45",
+        description: "Пространство для изучения языков, волонтеры-носители языка, бесплатные практики",
+        coords: [55.769, 37.614],
+        category: "community"
+    },
+    {
+        id: 10,
+        name: "Индивидуальные курсы 'Personal Tutor'",
+        type: "courses",
+        address: "г. Москва, ул. Никитская, д. 12",
+        hours: "По записи: Пн-Сб: 8:00-21:00",
+        phone: "+7 (495) 234-56-78",
+        description: "Индивидуальные занятия с репетиторами, подготовка к экзаменам, разговорная практика",
+        coords: [55.759, 37.601],
+        category: "courses"
+    }
+]
+
 document.addEventListener('DOMContentLoaded', function () {
     loadCourses()
     loadTutors()
     setupEventListeners()
+    initializeMap()
 })
 
 function setupEventListeners() {
@@ -71,6 +191,227 @@ function setupEventListeners() {
     document
         .getElementById('orderModal')
         .addEventListener('hidden.bs.modal', resetOrderForm)
+
+    // Map event listeners
+    document
+        .getElementById('search-resources-btn')
+        .addEventListener('click', searchResourcesOnMap)
+
+    document
+        .getElementById('reset-map-btn')
+        .addEventListener('click', resetMap)
+
+    document
+        .getElementById('searchTerm')
+        .addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault()
+                searchResourcesOnMap()
+            }
+        })
+
+    document
+        .getElementById('resourceType')
+        .addEventListener('change', searchResourcesOnMap)
+}
+
+// Map functions
+function initializeMap() {
+    // Wait for Yandex Maps API to load
+    if (typeof ymaps === 'undefined') {
+        setTimeout(initializeMap, 100)
+        return
+    }
+
+    ymaps.ready(initMap)
+
+    function initMap() {
+        // Create map centered on Moscow
+        yandexMap = new ymaps.Map('yandexMap', {
+            center: [55.7558, 37.6173], // Moscow center
+            zoom: 12,
+            controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+        })
+
+        // Add search control
+        const searchControl = new ymaps.control.SearchControl({
+            options: {
+                provider: 'yandex#search',
+                placeholderText: 'Поиск мест на карте'
+            }
+        })
+        yandexMap.controls.add(searchControl)
+
+        // Add all placemarks initially
+        addPlacemarks(mapResources)
+    }
+}
+
+function addPlacemarks(resources) {
+    // Clear existing placemarks
+    mapPlacemarks.forEach(function (placemark) {
+        yandexMap.geoObjects.remove(placemark)
+    })
+    mapPlacemarks = []
+    mapObjects = []
+
+    resources.forEach(function (resource) {
+        const placemark = new ymaps.Placemark(
+            resource.coords,
+            {
+                hintContent: resource.name,
+                balloonContentHeader: resource.name,
+                balloonContentBody: `
+                    <div style="max-width: 250px;">
+                        <strong>${resource.name}</strong><br>
+                        <em>${getTypeName(resource.category)}</em><br>
+                        <strong>Адрес:</strong> ${resource.address}<br>
+                        <strong>Часы работы:</strong> ${resource.hours}<br>
+                        <strong>Телефон:</strong> ${resource.phone}<br>
+                        <strong>Описание:</strong> ${resource.description}
+                    </div>
+                `,
+                balloonContentFooter: '<button class="btn btn-sm btn-primary mt-2" onclick="showResourceInfo(' + resource.id + ')">Подробнее</button>'
+            },
+            {
+                preset: getPlacemarkIcon(resource.category),
+                balloonMaxWidth: 300
+            }
+        )
+
+        yandexMap.geoObjects.add(placemark)
+        mapPlacemarks.push(placemark)
+        mapObjects.push(resource)
+    })
+
+    // Fit map to show all placemarks
+    if (resources.length > 0) {
+        yandexMap.setBounds(yandexMap.geoObjects.getBounds(), {
+            checkZoomRange: true,
+            padding: [50, 50]
+        })
+    }
+}
+
+function getPlacemarkIcon(category) {
+    const icons = {
+        educational: 'islands#educationIcon',
+        community: 'islands#cultureIcon',
+        library: 'islands#bookIcon',
+        courses: 'islands#collegeIcon',
+        cafe: 'islands#cafeIcon'
+    }
+    return icons[category] || 'islands#dotIcon'
+}
+
+function getTypeName(category) {
+    const names = {
+        educational: 'Образовательное учреждение',
+        community: 'Общественный центр',
+        library: 'Публичная библиотека',
+        courses: 'Частные языковые курсы',
+        cafe: 'Языковое кафе или клуб'
+    }
+    return names[category] || category
+}
+
+function searchResourcesOnMap() {
+    const searchTerm = document.getElementById('searchTerm').value.toLowerCase().trim()
+    const resourceType = document.getElementById('resourceType').value
+
+    let filtered = mapResources.filter(function (resource) {
+        const matchesSearch = !searchTerm || 
+            resource.name.toLowerCase().includes(searchTerm) ||
+            resource.description.toLowerCase().includes(searchTerm) ||
+            resource.address.toLowerCase().includes(searchTerm)
+        
+        const matchesType = !resourceType || resource.category === resourceType
+
+        return matchesSearch && matchesType
+    })
+
+    if (filtered.length === 0) {
+        showNotification('Ресурсы не найдены. Попробуйте изменить параметры поиска.', 'warning')
+        return
+    }
+
+    addPlacemarks(filtered)
+    showNotification(`Найдено ${filtered.length} ресурсов`, 'success')
+}
+
+function resetMap() {
+    document.getElementById('searchTerm').value = ''
+    document.getElementById('resourceType').value = ''
+    addPlacemarks(mapResources)
+    document.getElementById('resource-info-container').style.display = 'none'
+    showNotification('Карта сброшена', 'info')
+}
+
+function showResourceInfo(resourceId) {
+    const resource = mapResources.find(function (r) {
+        return r.id === resourceId
+    })
+
+    if (!resource) return
+
+    const container = document.getElementById('resource-info-container')
+    const details = document.getElementById('resource-details')
+
+    details.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Название:</strong> ${resource.name}</p>
+                <p><strong>Тип:</strong> ${getTypeName(resource.category)}</p>
+                <p><strong>Адрес:</strong> ${resource.address}</p>
+                <p><strong>Телефон:</strong> ${resource.phone}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Часы работы:</strong> ${resource.hours}</p>
+                <p><strong>Описание:</strong> ${resource.description}</p>
+            </div>
+        </div>
+        <div class="mt-3">
+            <button class="btn btn-outline-primary btn-sm" onclick="showRoute(${resource.coords[0]}, ${resource.coords[1]})">
+                Построить маршрут
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="hideResourceInfo()">
+                Скрыть
+            </button>
+        </div>
+    `
+
+    container.style.display = 'block'
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+}
+
+function hideResourceInfo() {
+    document.getElementById('resource-info-container').style.display = 'none'
+}
+
+function showRoute(lat, lon) {
+    if (!yandexMap) {
+        showNotification('Карта не инициализирована', 'warning')
+        return
+    }
+
+    // Create route from user's location (or default location) to the resource
+    const userLocation = [55.7558, 37.6173] // Default to Moscow center
+    
+    ymaps.route([userLocation, [lat, lon]], {
+        mapStateAutoApply: true
+    }).then(function (route) {
+        yandexMap.geoObjects.remove(route)
+        yandexMap.geoObjects.add(route)
+        
+        // Show route info
+        const distance = route.getLength()
+        const duration = route.getTime()
+        
+        showNotification(`Маршрут: ${Math.round(distance/1000)} км, ~${Math.round(duration/60)} мин`, 'info')
+    }).catch(function (error) {
+        showNotification('Не удалось построить маршрут', 'danger')
+        console.error('Route error:', error)
+    })
 }
 
 async function loadCourses() {
@@ -390,7 +731,6 @@ function handleDateChange() {
             '16:00',
             '17:00',
             '18:00',
-            '19:00',
         ]
         times.forEach(function (time) {
             const option = document.createElement('option')
