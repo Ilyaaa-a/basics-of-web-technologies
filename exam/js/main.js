@@ -320,11 +320,11 @@ function searchResourcesOnMap() {
     const resourceType = document.getElementById('resourceType').value
 
     let filtered = mapResources.filter(function (resource) {
-        const matchesSearch = !searchTerm || 
+        const matchesSearch = !searchTerm ||
             resource.name.toLowerCase().includes(searchTerm) ||
             resource.description.toLowerCase().includes(searchTerm) ||
             resource.address.toLowerCase().includes(searchTerm)
-        
+
         const matchesType = !resourceType || resource.category === resourceType
 
         return matchesSearch && matchesType
@@ -395,17 +395,17 @@ function showRoute(lat, lon) {
     }
 
     const userLocation = [55.7558, 37.6173] // Центр Москвы
-    
+
     ymaps.route([userLocation, [lat, lon]], {
         mapStateAutoApply: true
     }).then(function (route) {
         yandexMap.geoObjects.remove(route)
         yandexMap.geoObjects.add(route)
-        
+
         const distance = route.getLength()
         const duration = route.getTime()
-        
-        showNotification(`Маршрут: ${Math.round(distance/1000)} км, ~${Math.round(duration/60)} мин`, 'info')
+
+        showNotification(`Маршрут: ${Math.round(distance / 1000)} км, ~${Math.round(duration / 60)} мин`, 'info')
     }).catch(function (error) {
         showNotification('Не удалось построить маршрут', 'danger')
         console.error('Route error:', error)
@@ -589,7 +589,8 @@ function renderTutors() {
             return `
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="card h-100 tutor-card ${isSelected ? 'border-primary' : ''}" data-tutor-id="${tutor.id}">
-            <div class="card-body">
+            <div class="card-body text-center">
+              <img src="images/tutors.png" alt="${tutor.name}" class="tutor-avatar">
               <h5 class="card-title">${tutor.name}</h5>
               <div class="tutor-info mb-2">
                 <div><strong>Уровень:</strong> ${translateLevel(tutor.language_level)}</div>

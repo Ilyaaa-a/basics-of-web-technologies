@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
 
     <link rel="icon" href="/images/logo_lala.ico" type="image/x-icon">
 </head>
+
 <body>
     <!-- Шапка сайта -->
     <header class="bg-white shadow-sm">
@@ -21,11 +23,11 @@
                     <img src="images/logo_lala.png" alt="Language School Logo" class="logo-img me-2" width="40">
                     <span class="fw-bold">Language School</span>
                 </a>
-                
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                
+
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
@@ -50,7 +52,7 @@
         <div class="row">
             <div class="col-12">
                 <h1 class="mb-4">Личный кабинет</h1>
-                
+
                 <!-- Таблица заказов -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-primary text-white">
@@ -75,7 +77,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <!-- Карточки -->
                         <div class="row mt-4">
                             <div class="col-12">
@@ -111,7 +113,8 @@
             </div>
             <hr class="text-muted">
             <div class="text-center">
-                <p class="mb-0">2025 LALALang School.</p>
+                <p class="mb-0">Ilya 241-327.</p>
+                <p class="mb-0">2026 LALALang School.</p>
             </div>
         </div>
     </footer>
@@ -147,7 +150,7 @@
                         <input type="hidden" id="edit-order-id" value="">
                         <input type="hidden" id="edit-course-id" value="">
                         <input type="hidden" id="edit-tutor-id" value="">
-                        
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Курс/Репетитор</label>
@@ -188,13 +191,15 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="edit-option-supplementary">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="edit-option-supplementary">
                                             <label class="form-check-label" for="edit-option-supplementary">
                                                 Доп. материалы (+2000 ₽/студента)
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="edit-option-personalized">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="edit-option-personalized">
                                             <label class="form-check-label" for="edit-option-personalized">
                                                 Индивидуальные занятия (+1500 ₽/нед)
                                             </label>
@@ -214,7 +219,8 @@
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="edit-option-interactive">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="edit-option-interactive">
                                             <label class="form-check-label" for="edit-option-interactive">
                                                 Интерактивная платформа (+50%)
                                             </label>
@@ -227,12 +233,18 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <div id="edit-auto-options-badges" class="mb-2">
-                                    <span id="edit-badge-weekend" class="badge bg-warning text-dark" style="display: none;">Выходные (+50%)</span>
-                                    <span id="edit-badge-morning" class="badge bg-info" style="display: none;">Утро (+400 ₽)</span>
-                                    <span id="edit-badge-evening" class="badge bg-dark" style="display: none;">Вечер (+1000 ₽)</span>
-                                    <span id="edit-badge-intensive" class="badge bg-danger" style="display: none;">Интенсив (+20%)</span>
-                                    <span id="edit-badge-early" class="badge bg-success" style="display: none;">Ранняя регистрация (-10%)</span>
-                                    <span id="edit-badge-group" class="badge bg-primary" style="display: none;">Групповая (-15%)</span>
+                                    <span id="edit-badge-weekend" class="badge bg-warning text-dark"
+                                        style="display: none;">Выходные (+50%)</span>
+                                    <span id="edit-badge-morning" class="badge bg-info" style="display: none;">Утро
+                                        (+400 ₽)</span>
+                                    <span id="edit-badge-evening" class="badge bg-dark" style="display: none;">Вечер
+                                        (+1000 ₽)</span>
+                                    <span id="edit-badge-intensive" class="badge bg-danger"
+                                        style="display: none;">Интенсив (+20%)</span>
+                                    <span id="edit-badge-early" class="badge bg-success" style="display: none;">Ранняя
+                                        регистрация (-10%)</span>
+                                    <span id="edit-badge-group" class="badge bg-primary"
+                                        style="display: none;">Групповая (-15%)</span>
                                 </div>
                                 <div class="p-3 bg-light rounded border">
                                     <h5 class="mb-0">Итоговая стоимость: <span id="edit-total-cost">0</span> ₽</h5>
@@ -273,4 +285,5 @@
     <script src="js/api.js"></script>
     <script src="js/account.js"></script>
 </body>
+
 </html>
