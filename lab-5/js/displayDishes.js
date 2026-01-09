@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.setAttribute('data-dish', dish.keyword);
 
         card.innerHTML = `
-            <img src="/lab-5/images/${dish.image}.jpg" alt="${dish.name}">
+            <img src="../images/${dish.image}.jpg" alt="${dish.name}">
             <p class="price">${dish.price}₽</p>
             <p class="name">${dish.name}</p>
             <p class="weight">${dish.count}</p>
