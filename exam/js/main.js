@@ -7,12 +7,12 @@ let selectedCourse = null
 let selectedTutor = null
 const ITEMS_PER_PAGE = 5
 
-// Map variables
+// Яндекс карты
 let yandexMap = null
 let mapPlacemarks = []
 let mapObjects = []
 
-// Map resources data
+// Места на картах
 const mapResources = [
     {
         id: 1,
@@ -192,7 +192,7 @@ function setupEventListeners() {
         .getElementById('orderModal')
         .addEventListener('hidden.bs.modal', resetOrderForm)
 
-    // Map event listeners
+    // event listener для карты
     document
         .getElementById('search-resources-btn')
         .addEventListener('click', searchResourcesOnMap)
@@ -215,9 +215,9 @@ function setupEventListeners() {
         .addEventListener('change', searchResourcesOnMap)
 }
 
-// Map functions
+// Карта функции
 function initializeMap() {
-    // Wait for Yandex Maps API to load
+    // ожидание загрузки
     if (typeof ymaps === 'undefined') {
         setTimeout(initializeMap, 100)
         return
@@ -226,14 +226,14 @@ function initializeMap() {
     ymaps.ready(initMap)
 
     function initMap() {
-        // Create map centered on Moscow
+        // Создание карты
         yandexMap = new ymaps.Map('yandexMap', {
-            center: [55.7558, 37.6173], // Moscow center
+            center: [55.7558, 37.6173], // Центр Москвы примерно
             zoom: 12,
             controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
         })
 
-        // Add search control
+        // Добавление поиска
         const searchControl = new ymaps.control.SearchControl({
             options: {
                 provider: 'yandex#search',
@@ -242,13 +242,13 @@ function initializeMap() {
         })
         yandexMap.controls.add(searchControl)
 
-        // Add all placemarks initially
+        // Добавляю все места на карту
         addPlacemarks(mapResources)
     }
 }
 
 function addPlacemarks(resources) {
-    // Clear existing placemarks
+
     mapPlacemarks.forEach(function (placemark) {
         yandexMap.geoObjects.remove(placemark)
     })
@@ -284,7 +284,7 @@ function addPlacemarks(resources) {
         mapObjects.push(resource)
     })
 
-    // Fit map to show all placemarks
+    // Настройка масштаба карты чтобы было видно все точки на карте
     if (resources.length > 0) {
         yandexMap.setBounds(yandexMap.geoObjects.getBounds(), {
             checkZoomRange: true,
@@ -394,8 +394,7 @@ function showRoute(lat, lon) {
         return
     }
 
-    // Create route from user's location (or default location) to the resource
-    const userLocation = [55.7558, 37.6173] // Default to Moscow center
+    const userLocation = [55.7558, 37.6173] // Центр Москвы
     
     ymaps.route([userLocation, [lat, lon]], {
         mapStateAutoApply: true
@@ -403,7 +402,6 @@ function showRoute(lat, lon) {
         yandexMap.geoObjects.remove(route)
         yandexMap.geoObjects.add(route)
         
-        // Show route info
         const distance = route.getLength()
         const duration = route.getTime()
         
